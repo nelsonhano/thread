@@ -19,21 +19,14 @@ import { Textarea } from "@/components/ui/textarea";
 import { useRouter, usePathname } from "next/navigation";
 // import { updateUser } from "@/lib/actions/user.action";
 import { ThreadValidation } from "@/lib/validation/thread";
+import { createThread } from "@/lib/actions/thread.actions";
 
 
 interface Props {
-  user: {
-    id: string,
-    objectId: string,
-    username: string,
-    name: string,
-    bio: string,
-    image: string
-  }
-  btnTitle: string
+  userId: string
 }
 
-export default function PostThread({ userId }: { userId: string }) {
+export default function PostThread({ userId }: Props) {
   const pathname = usePathname();
   const router = useRouter();
   const form = useForm({
@@ -44,7 +37,15 @@ export default function PostThread({ userId }: { userId: string }) {
     }
   });
 
-  const onSubmit = () => {}
+  const onSubmit = async (values: z.infer<typeof ThreadValidation>) => {
+    await createThread({
+      text: values.thread,
+      author: userId,
+      communityId: null!,
+      path: pathname
+    });
+    router.push('/')
+  }
   
   return (
     <Form {...form}>

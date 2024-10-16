@@ -154,17 +154,17 @@ export default function AccountProfile({ user, btnTitle}: Props) {
 
               <FormField
                   control={form.control}
-                  name="name"
+                  name='name'
                   render={({ field }) => (
-                      <FormItem className="flex flex-col items-start gap-3 w-full">
-                          <FormLabel className="text-base-semibold text-light-2">
+                      <FormItem className='flex w-full flex-col gap-3'>
+                          <FormLabel className='text-base-semibold text-light-2'>
                               Name
                           </FormLabel>
-                          <FormControl className="flex-1 text-base-semibold text-gray-200">
+                          <FormControl>
                               <Input
-                                value={field.value} 
-                                type="text"
-                                className="account-form_input no-focus"
+                                  type='text'
+                                  className='account-form_input no-focus'
+                                  {...field}
                               />
                           </FormControl>
                           <FormMessage />
@@ -174,17 +174,17 @@ export default function AccountProfile({ user, btnTitle}: Props) {
 
               <FormField
                   control={form.control}
-                  name="username"
+                  name='username'
                   render={({ field }) => (
-                      <FormItem className="flex flex-col items-start gap-3 w-full">
-                          <FormLabel className="text-base-semibold text-light-2">
+                      <FormItem className='flex w-full flex-col gap-3'>
+                          <FormLabel className='text-base-semibold text-light-2'>
                               Username
                           </FormLabel>
-                          <FormControl className="flex-1 text-base-semibold text-gray-200">
+                          <FormControl>
                               <Input
-                                value={field.value}
-                                type="text"
-                                className="account-form_input no-focus"
+                                  type='text'
+                                  className='account-form_input no-focus'
+                                  {...field}
                               />
                           </FormControl>
                           <FormMessage />
