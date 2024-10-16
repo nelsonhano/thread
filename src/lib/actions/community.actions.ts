@@ -1,7 +1,6 @@
 "use server";
 
 import { FilterQuery, SortOrder } from "mongoose";
-
 import Community from "../models/community.model";
 import Thread from "../models/thread.model";
 import User from "../models/user.model";
@@ -103,6 +102,7 @@ export async function fetchCommunityPosts(id: string) {
     }
 }
 
+
 export async function fetchCommunities({
     searchString = "",
     pageNumber = 1,
@@ -112,21 +112,17 @@ export async function fetchCommunities({
     searchString?: string;
     pageNumber?: number;
     pageSize?: number;
-    sortBy?: SortOrder;
+    sortBy?: "asc" | "desc";
 }) {
     try {
         await connectToDatabase();
 
-        // Calculate the number of communities to skip based on the page number and page size.
         const skipAmount = (pageNumber - 1) * pageSize;
-
-        // Create a case-insensitive regular expression for the provided search string.
         const regex = new RegExp(searchString, "i");
 
-        // Create an initial query object to filter communities.
-        const query: FilterQuery<typeof Community> = {};
+        // Cast the query to the Community schema type
+        const query: FilterQuery<typeof Community.schema.obj> = {};
 
-        // If the search string is not empty, add the $or operator to match either username or name fields.
         if (searchString.trim() !== "") {
             query.$or = [
                 { username: { $regex: regex } },
@@ -134,22 +130,17 @@ export async function fetchCommunities({
             ];
         }
 
-        // Define the sort options for the fetched communities based on createdAt field and provided sort order.
         const sortOptions = { createdAt: sortBy };
 
-        // Create a query to fetch the communities based on the search and sort criteria.
         const communitiesQuery = Community.find(query)
             .sort(sortOptions)
             .skip(skipAmount)
             .limit(pageSize)
             .populate("members");
 
-        // Count the total number of communities that match the search criteria (without pagination).
         const totalCommunitiesCount = await Community.countDocuments(query);
-
         const communities = await communitiesQuery.exec();
 
-        // Check if there are more communities beyond the current page.
         const isNext = totalCommunitiesCount > skipAmount + communities.length;
 
         return { communities, isNext };
@@ -158,6 +149,7 @@ export async function fetchCommunities({
         throw error;
     }
 }
+
 
 export async function addMemberToCommunity(
     communityId: string,
