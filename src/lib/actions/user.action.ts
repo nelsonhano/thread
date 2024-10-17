@@ -1,7 +1,7 @@
 "use server"
 
 import { revalidatePath } from "next/cache";
-import User from "../models/user.model";
+import User, { IUser } from "../models/user.model";
 import { connectToDatabase } from "../mongoose"
 import Thread from "../models/thread.model";
 import { FilterQuery, SortOrder } from "mongoose";
@@ -146,6 +146,7 @@ export async function fetchUserPost(userId: string) {
 
 
 // Almost similar to Thead (search + pagination) and Community (search + pagination)
+
 export async function fetchUsers({
     userId,
     searchString = "",
@@ -157,7 +158,7 @@ export async function fetchUsers({
     searchString?: string;
     pageNumber?: number;
     pageSize?: number;
-    sortBy?: SortOrder;
+    sortBy?: 'asc' | 'desc';
 }) {
     try {
         await connectToDatabase();
@@ -169,7 +170,7 @@ export async function fetchUsers({
         const regex = new RegExp(searchString, "i");
 
         // Create an initial query object to filter users.
-        const query: FilterQuery<typeof User> = {
+        const query: FilterQuery<IUser> = {
             id: { $ne: userId }, // Exclude the current user from the results.
         };
 

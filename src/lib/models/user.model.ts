@@ -1,5 +1,17 @@
 import mongoose from "mongoose";
 
+
+export interface IUser {
+    id: string;
+    username: string;
+    name: string;
+    bio: string;
+    image: string;
+    onboarded: boolean;
+    // Other fields as necessary
+}
+
+
 const userSchema = new mongoose.Schema({
     id: {
         type: String,
