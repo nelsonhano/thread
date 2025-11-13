@@ -57,14 +57,15 @@ export async function fetchUser(userId: string) {
         //     model: Community
         // })
     } catch (error: any) {
-        throw new Error(`Failed to fetch user: ${error.message}`);
+        console.error("Failed to fetch user:", error);
+        throw error;
 
     }
 }
 
 export async function fetchUserPost(userId: string) {
     try {
-        connectToDatabase();
+        await connectToDatabase();
 
         // find all threads authored by user with the given userId
 

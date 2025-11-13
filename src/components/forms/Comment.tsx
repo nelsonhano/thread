@@ -45,7 +45,7 @@ export default function Comment({
         }
     });
     const onSubmit = async (values: z.infer<typeof CommentValidation>) => {
-        await addCommentToThread(threadId, values.thread, JSON.parse(currentUserId), pathname);
+        await addCommentToThread(threadId, values.thread, currentUserId, pathname);
         router.push('/');
 
         form.reset();

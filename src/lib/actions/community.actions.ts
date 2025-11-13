@@ -73,14 +73,15 @@ export async function fetchCommunityPosts(id: string) {
     try {
         await connectToDatabase();
 
-        const communityPosts = await Community.findById(id).populate({
+        // The "id" here refers to the community's custom id field, not MongoDB _id
+        const communityPosts = await Community.findOne({ id }).populate({
             path: "threads",
             model: Thread,
             populate: [
                 {
                     path: "author",
                     model: User,
-                    select: "name image id", // Select the "name" and "_id" fields from the "User" model
+                    select: "name image id", // Select the "name" and "id" fields from the "User" model
                 },
                 {
                     path: "children",
@@ -88,7 +89,7 @@ export async function fetchCommunityPosts(id: string) {
                     populate: {
                         path: "author",
                         model: User,
-                        select: "image _id", // Select the "name" and "_id" fields from the "User" model
+                        select: "image _id", // Select the "image" and "_id" fields from the "User" model
                     },
                 },
             ],
@@ -101,7 +102,6 @@ export async function fetchCommunityPosts(id: string) {
         throw error;
     }
 }
-
 
 export async function fetchCommunities({
     searchString = "",
@@ -265,7 +265,7 @@ export async function deleteCommunity(communityId: string) {
     try {
         await connectToDatabase();
 
-        // Find the community by its ID and delete it
+        // Find the community by its ID (custom field) and delete it
         const deletedCommunity = await Community.findOneAndDelete({
             id: communityId,
         });
@@ -274,15 +274,15 @@ export async function deleteCommunity(communityId: string) {
             throw new Error("Community not found");
         }
 
-        // Delete all threads associated with the community
-        await Thread.deleteMany({ community: communityId });
+        // Delete all threads associated with the community (use the MongoDB _id reference)
+        await Thread.deleteMany({ community: deletedCommunity._id });
 
         // Find all users who are part of the community
-        const communityUsers = await User.find({ communities: communityId });
+        const communityUsers = await User.find({ communities: deletedCommunity._id });
 
         // Remove the community from the 'communities' array for each user
         const updateUserPromises = communityUsers.map((user) => {
-            user.communities.pull(communityId);
+            user.communities.pull(deletedCommunity._id);
             return user.save();
         });
 

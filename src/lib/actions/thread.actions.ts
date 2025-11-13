@@ -3,12 +3,13 @@
 import { revalidatePath } from "next/cache";
 import Thread from "../models/thread.model";
 import User from "../models/user.model";
+import Community from "../models/community.model";
 import { connectToDatabase } from "../mongoose"
 
 interface Params {
     text: string,
     author: string,
-    communityId: string,
+    communityId?: string | null,
     path: string
 }
 
@@ -21,22 +22,39 @@ export async function createThread({
     try {
         await connectToDatabase();
 
-        //Create threads
+        // Resolve community if provided (supports either Mongo _id or custom community.id)
+        let communityDoc = null as any;
+        if (communityId) {
+            try {
+                communityDoc = await Community.findById(communityId);
+            } catch {}
+            if (!communityDoc) {
+                communityDoc = await Community.findOne({ id: communityId });
+            }
+        }
+
+        // Create thread
         const createdThread = await Thread.create({
             text,
             author,
-            community: null
+            community: communityDoc ? communityDoc._id : null,
         });
 
-        //Update user model
+        // Update user model
         await User.findByIdAndUpdate(author, {
             $push: { threads: createdThread._id }
         });
 
+        // If thread belongs to a community, link it on the community document
+        if (communityDoc) {
+            await Community.findByIdAndUpdate(communityDoc._id, {
+                $push: { threads: createdThread._id }
+            });
+        }
+
         revalidatePath(path);
     } catch (error: any) {
         throw new Error(`Error creating a thread ${error.message}`);
-
     }
 }
 
